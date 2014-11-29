@@ -1,4 +1,4 @@
-leaflet-app
-===========
+cordova-leaflet-app
+===================
 
-Sample prosject using leaflet as mapping component
+Sample project using cordova to build leaflet as mapping component
