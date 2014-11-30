@@ -14,6 +14,9 @@
 # Java class files
 *.class
 
+# Ant-build files
+ant-build
+
 # Generated files - android project subfolder
 Android/bin/
 Android/gen/
