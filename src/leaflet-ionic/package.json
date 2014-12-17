@@ -5,6 +5,7 @@
   "dependencies": {},
   "devDependencies": {
     "cordova": "~3.5.0-0.2.6",
+    "fixmyjs": "^0.13.6",
     "glob": "~4.0.5",
     "grunt": "~0.4.1",
     "grunt-autoprefixer": "~0.4.0",
@@ -54,6 +55,7 @@
     "org.apache.cordova.statusbar",
     "org.apache.cordova.console",
     "org.apache.cordova.device",
-    "org.apache.cordova.geolocation"
+    "org.apache.cordova.geolocation",
+    "org.apache.cordova.splashscreen"
   ]
 }

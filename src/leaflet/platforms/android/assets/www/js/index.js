@@ -98,8 +98,6 @@ var app = {
 		});
 		map.addControl(drawControl);
 
-		new L.Draw.PolylineTouch(map).enable();
-
 		map.on('draw:created', function (e) {
 			var type = e.layerType,
 				layer = e.layer;

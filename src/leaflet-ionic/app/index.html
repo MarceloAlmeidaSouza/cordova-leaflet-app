@@ -11,7 +11,6 @@
 
     <!-- build:css styles/vendor.css -->
     <link rel="stylesheet" href="vendor/leaflet/leaflet.css"/>
-    <link rel="stylesheet" href="vendor/leaflet/leaflet.draw.css"/>
     <link rel="stylesheet" href="vendor/leaflet/l.geosearch.css"/>
 
     <!-- bower:css -->
@@ -30,9 +29,9 @@
 
     <!-- build:js scripts/vendor.js -->
     <script src="vendor/leaflet/leaflet.js"></script>
-    <script src="vendor/leaflet/leaflet.draw.js"></script>
     <script src="vendor/leaflet/l.control.geosearch.js"></script>
     <script src="vendor/leaflet/l.geosearch.provider.google.js"></script>
+    <script src="vendor/leaflet/Leaflet.Editable.js"></script>
     <!-- bower:js -->
     <script src="lib/angular/angular.js"></script>
     <script src="lib/angular-animate/angular-animate.js"></script>
@@ -44,14 +43,21 @@
     <!-- endbower -->
     <!-- endbuild -->
 
+    <script src="lib/ngCordova/dist/ng-cordova.js"></script>
+
     <!-- cordova script (this will be a 404 during development) -->
     <script src="cordova.js"></script>
 
     <!-- build:js scripts/scripts.js -->
     <script src="scripts/config.js"></script>
     <script src="scripts/app.js"></script>
-    <script src="scripts/controllers.js"></script>
     <script src="scripts/directives.js"></script>
+    <script src="scripts/directives/map.js"></script>
+    <script src="scripts/directives/layers.js"></script>
+    <script src="scripts/controllers.js"></script>
+    <script src="scripts/controllers/app.js"></script>
+    <script src="scripts/controllers/map.js"></script>
+    <script src="scripts/controllers/layers.js"></script>
     <!-- endbuild -->
 </body>
 </html>

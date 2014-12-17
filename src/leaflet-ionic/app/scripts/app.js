@@ -1,8 +1,8 @@
 'use strict';
 
-angular.module('LeafletIonic', ['ionic', 'config', 'LeafletIonic.controllers', 'LeafletIonic.directives'])
+angular.module('LeafletIonic', ['ionic', 'config', 'ngCordova', 'LeafletIonic.controllers', 'LeafletIonic.directives'])
 
-.run(function($ionicPlatform) {
+.run(function($ionicPlatform, $cordovaSplashscreen) {
 
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -14,6 +14,7 @@ angular.module('LeafletIonic', ['ionic', 'config', 'LeafletIonic.controllers', '
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
+
   });
 
 })
