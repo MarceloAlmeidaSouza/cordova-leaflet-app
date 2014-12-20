@@ -1,10 +1,13 @@
 'use strict';
 
-angular.module('LeafletIonic', ['ionic', 'config', 'ngCordova', 'LeafletIonic.controllers', 'LeafletIonic.directives'])
+angular.module('LeafletIonic', ['ionic', 'config', 'ngCordova',
+  'LeafletIonic.directives',
+  'LeafletIonic.controllers',
+  'LeafletIonic.services'])
 
-.run(function($ionicPlatform, $cordovaSplashscreen) {
+.run(['$ionicPlatform', function(ionicPlatform) {
 
-  $ionicPlatform.ready(function() {
+  ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
     if(window.cordova && window.cordova.plugins.Keyboard) {
@@ -17,10 +20,10 @@ angular.module('LeafletIonic', ['ionic', 'config', 'ngCordova', 'LeafletIonic.co
 
   });
 
-})
+}])
 
-.config(function($stateProvider, $urlRouterProvider) {
-  $stateProvider
+.config(['$stateProvider', '$urlRouterProvider', function(stateProvider, urlRouterProvider) {
+  stateProvider
 
     .state('app', {
       url: "/app",
@@ -39,6 +42,6 @@ angular.module('LeafletIonic', ['ionic', 'config', 'ngCordova', 'LeafletIonic.co
     });
 
   // If none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/map');
+  urlRouterProvider.otherwise('/app/map');
 
-});
+}]);

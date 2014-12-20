@@ -2,18 +2,15 @@
 
 angular.module('LeafletIonic.directives')
 
-.directive('map', function() {
+.directive('map', ['setup', function(setup) {
   return {
     restrict: 'E',
-    scope: {
-      layers: '='
-    },
     replace: true,
-    transclude: true,
     templateUrl: 'templates/directives/map.html',
     controller: 'MapCtrl',
-    link: function(scope, element, attrs, controller) {
-      controller.init( element[0] );
+    require: ['^mapView', '^map'],
+    link: function(scope, element, attrs, controllers) {
+      controllers[0].init( controllers[1].init(element[0]) );
     }
   }
-});
+}]);
