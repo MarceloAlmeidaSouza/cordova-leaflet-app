@@ -13,17 +13,15 @@ angular.module('LeafletIonic.services')
 
       g.geocode({address: query}, function(data) {
 
-        data = {results: data};
-
-        if (data.results.length == 0)
+        if (!data || data.length == 0)
           return [];
 
         var results = [];
-        for (var i = 0; i < data.results.length; i++)
-          if(data.results[i].geometry !== undefined && data.results[i].geometry.location !== undefined) {
-            var location = data.results[i].geometry.location;
+        for (var i = 0; i < data.length; i++)
+          if(data[i].geometry !== undefined && data[i].geometry.location !== undefined) {
+            var location = data[i].geometry.location;
             results.push({
-              address: data.results[i].formatted_address,
+              address: data[i].formatted_address,
               location: L.latLng(location.lat(), location.lng())
             });
           }

@@ -2,7 +2,7 @@
 
 angular.module('LeafletIonic.directives')
 
-.directive('map', ['setup', function(setup) {
+.directive('map', function() {
   return {
     restrict: 'E',
     replace: true,
@@ -13,4 +13,4 @@ angular.module('LeafletIonic.directives')
       controllers[0].init( controllers[1].init(element[0]) );
     }
   }
-}]);
+});

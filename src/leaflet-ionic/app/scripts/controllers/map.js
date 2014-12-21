@@ -23,18 +23,25 @@ angular.module('LeafletIonic.controllers')
 
   // Search and center on given location.
   map.search = function(query) {
-    geocode.search(query).then(function(results) {
-      if(results.length = 1)
-        map.panTo(results[0].location, true);
-      else
-        this.mark(false);
-    });
+    if(query) {
+      geocode.search(query).then(function(results) {
+        scope.search.results = results;
+        if(results.length === 1) {
+          map.panTo(results[0].location, true);
+        }
+        else
+          map.mark(false);
+      });
+    } else {
+      map.mark(false);
+      scope.search.results = [];
+    }
   };
 
   // Pan map to given location.
   map.panTo = function(location, mark) {
     map.mark(mark ? location : false);
-    map.leaflet.setView(location, 10, false);
+    map.leaflet.setView(location, 14, false);
     return map;
    };
 
