@@ -45,3 +45,6 @@ angular.module('LeafletIonic', ['ionic', 'config', 'ngCordova',
   urlRouterProvider.otherwise('/app/map');
 
 }]);
+
+// Define application namespace
+var LeafletIonic = {};

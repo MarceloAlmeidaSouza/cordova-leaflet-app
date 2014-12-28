@@ -6,20 +6,16 @@
       <input type="search" placeholder="Search" ng-model="search.query" ng-model-options="{debounce: 1500}" ng-change="search()">
       <i class="icon ion-close placeholder-icon" ng-click="reset('search');"></i>
     </div>
+    <div class="padding-left" ng-show="map.editable">
+      <button class="button button-clear button-small" ng-click="map.cancel()">Cancel</button>
+      <button class="button button-clear button-small button-positive" ng-click="map.finish()">Finish</button>
+    </div>
   </ion-header-bar>
   <ion-content class="has-header" scroll="false" ng-show="search.results.length < 2">
-    <map layers fullscreen locate></map>
-    <!--div style="
-    position:absolute;
-    width:200px;height:50px;top:10px;right:10px;
-    padding:16px;background:#FFFFFF;
-    border:2px solid #2266AA;
-    z-index:10000" class="ng-hide" ng-show="!show.map">
-      This is a floating javascript menu.
-    </div -->
+    <map layers locate editable></map>
   </ion-content>
   <ion-content class="has-header" scroll="true" ng-show="search.results.length > 1">
-    <ion-scoll ng-show="search.results.length > 1">
+    <ion-scoll>
       <ul class="list">
         <li class="item" ng-repeat="hit in search.results" ng-click="panTo({{$index}})">
           {{hit.address}}

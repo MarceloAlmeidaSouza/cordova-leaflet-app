@@ -2,7 +2,7 @@
 
 angular.module('LeafletIonic.controllers')
 
-.controller('MapViewCtrl', ['$scope', function(scope) {
+.controller('MapViewCtrl', ['$scope', '$rootScope', function(scope, dispatch) {
 
   var view = this;
 
@@ -15,6 +15,22 @@ angular.module('LeafletIonic.controllers')
     view.map.search(scope.search.query);
   };
   scope.search.results = [];
+
+  // Editable map model
+  scope.map = {
+    editable: false,
+    finish: function() {
+      scope.map.editable = false;
+      dispatch.$broadcast('editable:finish');
+    },
+    cancel: function() {
+      scope.map.editable = false;
+      dispatch.$broadcast('editable:cancel');
+    }
+  };
+  scope.$on('editable:begin', function() {
+    scope.map.editable = true;
+  });
 
   // Pan to location in search result at given index
   scope.panTo = function(index) {

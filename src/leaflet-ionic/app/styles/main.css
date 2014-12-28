@@ -97,6 +97,8 @@ h1 {
     -webkit-animation:fade 3000ms infinite;
 }
 
+/* map */
+
 .map {
   min-height: 100%;
 }
@@ -105,3 +107,91 @@ h1 {
   padding: 8px !important;
   text-indent: 0px !important;
 }
+
+/* map icons */
+
+.map-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  background-image: url(../images/editable-16.png);
+}
+
+.map-icon.map-icon-edit {
+}
+
+.map-icon.map-icon-marker {
+  background-position: -107px -26px;
+}
+
+.map-icon.map-icon-polyline {
+  background-position: -80px -26px;
+}
+
+.map-icon.map-icon-polygon {
+  background-position: -54px -27px;
+}
+
+.map-icon.map-icon-trash {
+  background-position: -27px -0px;
+}
+
+.map-icon.map-icon-active {
+  outline: 2px solid orange;
+}
+
+/* map edit control */
+.map-editable-expanded {
+  display: block;
+}
+
+.map-editable-collapsed {
+  display: none;
+}
+
+/*
+.map-edit {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.map-edit-toggle {
+	background-image: url(images/layers.png);
+	width: 36px;
+	height: 36px;
+	}
+.leaflet-retina .map-edit-toggle {
+	background-image: url(images/layers-2x.png);
+	background-size: 26px 26px;
+	}
+.leaflet-touch .map-edit-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.map-edit .map-edit-list,
+.map-edit-expanded .map-edit-toggle {
+	display: none;
+	}
+.map-edit-expanded .map-edit-list {
+	display: block;
+	position: relative;
+	}
+.map-edit-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.map-edit-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.map-edit label {
+	display: block;
+	}
+.map-edit-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+*/
