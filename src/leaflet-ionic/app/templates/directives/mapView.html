@@ -7,7 +7,7 @@
       <i class="icon ion-close placeholder-icon" ng-click="reset('search');"></i>
     </div>
     <div class="padding-left" ng-show="map.editable">
-      <button class="button button-clear button-small" ng-click="map.cancel()">Cancel</button>
+      <button class="button button-clear button-small" ng-click="map.cancel($event)">Cancel</button>
       <button class="button button-clear button-small button-positive" ng-click="map.finish()">Finish</button>
     </div>
   </ion-header-bar>

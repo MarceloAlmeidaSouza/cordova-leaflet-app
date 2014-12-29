@@ -2,7 +2,7 @@
 
 angular.module('LeafletIonic.controllers')
 
-.controller('MapViewCtrl', ['$scope', '$rootScope', function(scope, dispatch) {
+.controller('MapViewCtrl', ['$scope', 'dispatch', function(scope, dispatch) {
 
   var view = this;
 
@@ -21,11 +21,12 @@ angular.module('LeafletIonic.controllers')
     editable: false,
     finish: function() {
       scope.map.editable = false;
-      dispatch.$broadcast('editable:finish');
+      dispatch.broadcast('editable:finish');
     },
-    cancel: function() {
+    cancel: function(e) {
       scope.map.editable = false;
-      dispatch.$broadcast('editable:cancel');
+      dispatch.broadcast('editable:cancel');
+      e.stopImmediatePropagation();
     }
   };
   scope.$on('editable:begin', function() {
