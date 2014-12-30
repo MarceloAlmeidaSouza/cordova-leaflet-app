@@ -15,31 +15,19 @@ angular.module('LeafletIonic.controllers')
     var features;
 
     map.leaflet.whenReady(function () {
-      /*
-      // TODO: Get features from service
-      var features = JSON.parse(
-      '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[10.164413452148438,59.7302733236073]}}]}');
-      var featuresLayer = new L.geoJson(features);
-      var featuresLayer = new L.geoJson(features);
-      */
       var featuresLayer = new L.GeoJSON;
 
-      // Add for GeoJSON support
+      // Add GeoJSON support
       var options = this.options.editOptions || {};
       options.featuresLayer = featuresLayer;
       options.featuresLayer.addTo(this);
       this.editTools = new L.Editable(this, options);
 
       storage.get('features', function(features) {
-
         if(features)
           options.featuresLayer.addData(features);
-
       });
-
-
     });
-
 
     LeafletIonic.Editable.edit(dispatch, storage)
       .add(new LeafletIonic.Editable.Marker)
@@ -56,8 +44,8 @@ angular.module('LeafletIonic.controllers')
 LeafletIonic.Editable = {
   Dom: {
     /* Add control button to container */
-    button: function(container, title, icon, visible) {
-      var link = L.DomUtil.create('a', (visible ? 'ng-show' : 'ng-hide'), container);
+    button: function(container, title, icon) {
+      var link = L.DomUtil.create('a', '', container);
       link.href = '#';
       link.title = title;
       link.innerHTML = '<i class="map-icon ' + icon + '"></i>';
@@ -105,13 +93,13 @@ LeafletIonic.Editable.Edit = L.Control.extend({
     var editable = this;
     var dispatch = this.dispatch;
     // Contains all controls
-    var container = L.DomUtil.create('div', 'leaflet-control');
+    var container = L.DomUtil.create('div', 'leaflet-control ng-show');
     // Contains edit control
     var edit = L.DomUtil.create('div', 'leaflet-bar', container);
-    edit.button = LeafletIonic.Editable.Dom.button(edit, 'Edit map features', 'map-icon-edit', true);
+    edit.button = LeafletIonic.Editable.Dom.button(edit, 'Edit map features', 'map-icon-edit');
     editable.ui = {edit: edit};
     // Contains all feature controls
-    var features = L.DomUtil.create('div', 'leaflet-bar', container);
+    var features = L.DomUtil.create('div', 'leaflet-bar ng-hide', container);
     editable.ui.features = features;
     angular.forEach(editable.controls, function(control) {
         control.ui = control.onAdd(editable, map, dispatch);
@@ -127,16 +115,16 @@ LeafletIonic.Editable.Edit = L.Control.extend({
     dispatch.on('editable:cancel', function(e) {
       editable.hide();
       angular.forEach(editable.changes, function(feature) {
-        map.removeLayer(feature);
+        map.editTools.featuresLayer.removeLayer(feature);
       });
       if(typeof editable.active.cancel === 'function')
-        editable.active.cancel(editable);
+        editable.active.cancel();
     });
     dispatch.on('editable:finish', function() {
       editable.hide();
       editable.changes = [];
       if(typeof editable.active.finish === 'function')
-        editable.active.finish(editable);
+        editable.active.finish();
 
       // Store features
       var features = map.editTools.featuresLayer.toGeoJSON();
@@ -145,7 +133,7 @@ LeafletIonic.Editable.Edit = L.Control.extend({
     });
     return container;
   },
-  onFinish: function(feature) {
+  onCommit: function(feature) {
     this.changes.push(feature);
   },
   add: function(control) {
@@ -153,16 +141,12 @@ LeafletIonic.Editable.Edit = L.Control.extend({
     return this;
   },
   show: function() {
-    LeafletIonic.Editable.Dom.Css.replace(this.ui.edit.button, 'ng-show', 'ng-hide');
-    angular.forEach(this.controls, function(control) {
-      LeafletIonic.Editable.Dom.Css.replace(control.ui, 'ng-hide', 'ng-show');
-    });
+    LeafletIonic.Editable.Dom.Css.replace(this.ui.edit, 'ng-show', 'ng-hide');
+    LeafletIonic.Editable.Dom.Css.replace(this.ui.features, 'ng-hide', 'ng-show');
   },
   hide: function() {
-    LeafletIonic.Editable.Dom.Css.replace(this.ui.edit.button, 'ng-hide', 'ng-show');
-    angular.forEach(this.controls, function(control) {
-      LeafletIonic.Editable.Dom.Css.replace(control.ui, 'ng-show', 'ng-hide');
-    });
+    LeafletIonic.Editable.Dom.Css.replace(this.ui.edit, 'ng-hide', 'ng-show');
+    LeafletIonic.Editable.Dom.Css.replace(this.ui.features, 'ng-show', 'ng-hide');
   }
 }),
 LeafletIonic.Editable.edit = function (dispatch, storage, options) {
@@ -186,7 +170,7 @@ LeafletIonic.Editable.Base = L.Class.extend({
     this.dispatch = dispatch;
     L.DomEvent.on(button, 'click', L.DomEvent.stop).on(button, 'click', function (e) {
       if(editable.active === base) {
-        base.finish(editable);
+        base.finish();
       } else {
         base.begin(editable, map);
       }
@@ -196,99 +180,161 @@ LeafletIonic.Editable.Base = L.Class.extend({
   begin: function(editable, map) {
     var response;
     if(response = (editable.active !== this)) {
-      if(typeof editable.active.cancel === 'function')
-        editable.active.finish(editable);
+      this.map = map;
+      this.editable = editable;
+      if(typeof editable.active.finish === 'function')
+        editable.active.finish();
       editable.active = this;
       if(this.options.stateless === false)
         LeafletIonic.Editable.Dom.Css.add(this.ui, 'leaflet-active');
-      response = this.onBegin(map);
+      response = this.onBegin();
     }
     return response;
   },
-  cancel: function(editable) {
+  cancel: function() {
     var response;
-    if(response = (editable.active === this)) {
-      editable.active = {};
+    if(response = (this.editable.active === this)) {
+      this.editable.active = {};
       if(this.options.stateless === false)
         LeafletIonic.Editable.Dom.Css.remove(this.ui, 'leaflet-active');
-      response = this.onCancel(editable);
+      response = this.onCancel();
+      delete this.map;
+      delete this.editable;
     }
     return response;
   },
-  finish: function(editable) {
+  finish: function() {
     var response;
-    if(response = (editable.active === this)) {
-      editable.active = {};
+    if(response = (this.editable.active === this)) {
+      this.editable.active = {};
       if(this.options.stateless === false)
         LeafletIonic.Editable.Dom.Css.remove(this.ui, 'leaflet-active');
-      response = this.onFinish(editable);
+      response = this.onFinish();
+      delete this.map;
+      delete this.editable;
     }
     return response;
   },
-  onBegin: function(map) {
+  onBegin: function() {
     /* Override */
   },
-  onCancel: function(editable) {
+  onCancel: function() {
     /* Override */
   },
-  onFinish: function(editable) {
+  onFinish: function() {
     /* Override */
   }
 });
 
 /* Feature control */
 LeafletIonic.Editable.Feature = LeafletIonic.Editable.Base.extend({
-  initialize: function(title, icon) {
+  initialize: function(type, title, icon, direct) {
+    this.type = type;
+    this.direct =  direct || false;
     LeafletIonic.Editable.Base.prototype.initialize.call(this, title, icon);
   },
-  onBegin: function(map) {
-    return (this.feature = this.onStart(map));
+  onBegin: function() {
+    this.enable();
+    return this.feature || true;
   },
-  onCancel: function(editable) {
+  onHook: function(e) {
+    if(this.hook === 'click') {
+      this.onCommit();
+      this.feature = this.onStart(e.latlng);
+      if(this.direct) {
+        this.onCommit();
+      }
+      this.listen('dblclick');
+      L.DomEvent.stop(e);
+    }
+    else if(this.hook === 'dblclick') {
+      this.onCommit();
+      this.listen('click');
+      L.DomEvent.stop(e);
+    }
+  },
+  onStart: function(latlng) {
+    /* Override this */
+  },
+  onCommit: function() {
     var response;
     if(response = (typeof this.feature !== 'undefined')) {
-      this.feature.editor.tools.stopDrawing();
-      this.feature.editor.map.removeLayer(this.feature);
+      this.map.editTools.stopDrawing();
+      this.editable.onCommit(this.feature);
+      delete this.feature;
     }
     return response;
   },
-  onFinish: function(editable) {
+  onFinish: function() {
+    var response = this.onCommit();
+    this.disable();
+    return response;
+  },
+  onCancel: function() {
     var response;
     if(response = (typeof this.feature !== 'undefined')) {
-      this.feature.editor.tools.stopDrawing();
-      editable.onFinish(this.feature);
+      this.map.editTools.stopDrawing();
+      this.map.editTools.featuresLayer.removeLayer(this.feature);
+      delete this.feature;
     }
+    this.disable();
     return response;
+  },
+  enable: function() {
+    var control = this;
+    this.listen('click');
+    this.map.editTools.featuresLayer.eachLayer(function(feature, layer) {
+      if(feature instanceof control.type)
+        feature.enableEdit();
+    });
+  },
+  disable: function() {
+    var control = this;
+    this.map.off(this.hook, this.onHook, this);
+    this.map.editTools.featuresLayer.eachLayer(function(feature, layer) {
+      if(feature instanceof control.type)
+        feature.disableEdit();
+    });
+  },
+  listen: function(hook) {
+    if(this.hook !== hook) {
+      if(this.hook)
+        this.map.off(this.hook, this.onHook, this);
+      this.hook = hook;
+      this.map.on(hook, this.onHook, this);
+    }
   }
 });
 
 /* Marker control */
 LeafletIonic.Editable.Marker = LeafletIonic.Editable.Feature.extend({
   initialize: function () {
-    LeafletIonic.Editable.Feature.prototype.initialize.call(this, 'Add a new marker', 'map-icon-marker');
+    LeafletIonic.Editable.Feature.prototype.initialize.call(this, L.Marker, 'Add a new marker', 'map-icon-marker', true);
   },
-  onStart: function(map) {
-    return map.editTools.startMarker();
+  onStart: function(latlng) {
+    return this.map.editTools.startMarker(latlng);
   }
 });
 
 /* Polyline control */
 LeafletIonic.Editable.Polyline = LeafletIonic.Editable.Feature.extend({
   initialize: function () {
-    LeafletIonic.Editable.Feature.prototype.initialize.call(this, 'Add a new line','map-icon-polyline');
+    LeafletIonic.Editable.Feature.prototype.initialize.call(this, L.Polyline, 'Add a new line','map-icon-polyline');
   },
-  onStart: function(map) {
-    return map.editTools.startPolyline();
+  onStart: function(latlng) {
+    console.log(latlng);
+    return this.map.editTools.startPolyline(latlng);
   }
 });
 
 /* Polygon control */
 LeafletIonic.Editable.Polygon = LeafletIonic.Editable.Feature.extend({
   initialize: function () {
-    LeafletIonic.Editable.Feature.prototype.initialize.call(this, 'Add a new line','map-icon-polygon');
+    LeafletIonic.Editable.Feature.prototype.initialize.call(this, L.Polygon, 'Add a new line','map-icon-polygon');
   },
-  onStart: function(map) {
-    return map.editTools.startPolygon();
+  onStart: function(latlng) {
+    console.log(latlng);
+    return this.map.editTools.startPolygon();
   }
 });
 
@@ -297,8 +343,26 @@ LeafletIonic.Editable.Delete = LeafletIonic.Editable.Base.extend({
   initialize: function () {
     LeafletIonic.Editable.Base.prototype.initialize.call(this, 'Delete features','map-icon-trash');
   },
-  onBegin: function(editable, map) {
+  onBegin: function() {
+    var control = this;
+    this.map.editTools.featuresLayer.eachLayer(function(feature) {
+      feature.on('click', control.onDelete, control);
+    });
     return true;
+  },
+  onDelete: function(e) {
+    this.map.editTools.featuresLayer.removeLayer(e.target);
+  },
+  onFinish: function() {
+    var control = this;
+    this.map.editTools.featuresLayer.eachLayer(function(feature) {
+      feature.off('click', control.onDelete, control);
+    });
+    delete this.map;
+  },
+  onCancel: function() {
+    this.onFinish();
   }
+
 });
 

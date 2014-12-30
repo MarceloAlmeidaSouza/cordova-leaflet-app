@@ -16,7 +16,9 @@ angular.module('LeafletIonic.controllers')
 
   // Initialize Leaflet instance
   map.init = function(element) {
-    map.leaflet = L.map(element);
+    map.leaflet = L.map(element, {
+      doubleClickZoom: false
+    });
     deferred.resolve(map.leaflet);
     return map;
   };

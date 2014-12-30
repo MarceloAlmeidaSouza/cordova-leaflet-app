@@ -8,7 +8,7 @@ angular.module('LeafletIonic.directives')
     controller: 'LayersCtrl',
     require: ['^layers', '^map'],
     link: function(scope, element, attrs, controllers) {
-      controllers[0].init(controllers[1], setup.layers);
+      controllers[0].init(controllers[1], setup.layers.bases, setup.layers.overlays);
     }
   }
 }]);

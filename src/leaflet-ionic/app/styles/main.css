@@ -111,10 +111,12 @@ h1 {
 /* map icons */
 
 .map-icon {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   display: block;
-  background-image: url(../images/editable-16.png);
+	background-repeat: no-repeat;
+  background-size: 133px 133px;
+  background-image: url(../images/editable-24.png);
 }
 
 .map-icon.map-icon-edit {
