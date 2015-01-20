@@ -235,25 +235,21 @@ LeafletIonic.Editable.Feature = LeafletIonic.Editable.Base.extend({
   },
   onBegin: function() {
     this.enable();
-    return this.feature || true;
+    return this.feature;
   },
   onHook: function(e) {
-    if(this.hook === 'click') {
-      this.onCommit();
+    if(typeof this.feature === 'undefined') {
       this.feature = this.onStart(e.latlng);
+      console.log("onHook");
       if(this.direct) {
         this.onCommit();
       }
-      this.listen('dblclick');
-      L.DomEvent.stop(e);
-    }
-    else if(this.hook === 'dblclick') {
-      this.onCommit();
-      this.listen('click');
-      L.DomEvent.stop(e);
     }
   },
   onStart: function(latlng) {
+    /* Override this */
+  },
+  onVertex: function(e) {
     /* Override this */
   },
   onCommit: function() {
@@ -262,6 +258,7 @@ LeafletIonic.Editable.Feature = LeafletIonic.Editable.Base.extend({
       this.map.editTools.stopDrawing();
       this.editable.onCommit(this.feature);
       delete this.feature;
+      console.log("onCommit");
     }
     return response;
   },
@@ -283,18 +280,23 @@ LeafletIonic.Editable.Feature = LeafletIonic.Editable.Base.extend({
   enable: function() {
     var control = this;
     this.listen('click');
+    this.map.on('editable:drawing:commit', this.onCommit, this);
+    this.map.on('editable:vertex:mousedown', this.onVertex, this);
     this.map.editTools.featuresLayer.eachLayer(function(feature, layer) {
-      if(feature instanceof control.type)
+      if(feature.constructor === control.type)
         feature.enableEdit();
     });
   },
   disable: function() {
     var control = this;
     this.map.off(this.hook, this.onHook, this);
+    this.map.off('editable:drawing:commit', this.onCommit, this);
+    this.map.off('editable:vertex:mousedown', this.onVertex, this);
     this.map.editTools.featuresLayer.eachLayer(function(feature, layer) {
-      if(feature instanceof control.type)
+      if(feature.constructor === control.type)
         feature.disableEdit();
     });
+    delete this.hook;
   },
   listen: function(hook) {
     if(this.hook !== hook) {
@@ -309,7 +311,8 @@ LeafletIonic.Editable.Feature = LeafletIonic.Editable.Base.extend({
 /* Marker control */
 LeafletIonic.Editable.Marker = LeafletIonic.Editable.Feature.extend({
   initialize: function () {
-    LeafletIonic.Editable.Feature.prototype.initialize.call(this, L.Marker, 'Add a new marker', 'map-icon-marker', true);
+    LeafletIonic.Editable.Feature.prototype.initialize.call(
+      this, L.Marker, 'Add a new marker', 'map-icon-marker', true);
   },
   onStart: function(latlng) {
     return this.map.editTools.startMarker(latlng);
@@ -319,11 +322,48 @@ LeafletIonic.Editable.Marker = LeafletIonic.Editable.Feature.extend({
 /* Polyline control */
 LeafletIonic.Editable.Polyline = LeafletIonic.Editable.Feature.extend({
   initialize: function () {
-    LeafletIonic.Editable.Feature.prototype.initialize.call(this, L.Polyline, 'Add a new line','map-icon-polyline');
+    LeafletIonic.Editable.Feature.prototype.initialize.call(
+      this, L.Polyline, 'Add a new line','map-icon-polyline');
   },
   onStart: function(latlng) {
-    console.log(latlng);
+    //console.log(latlng);
     return this.map.editTools.startPolyline(latlng);
+  },
+  onVertex: function(e) {
+    if(typeof this.feature === 'undefined') {
+      var index = e.vertex.getIndex();
+      if (index === 0) {
+        e.layer.editor.continueBackward();
+        this.feature = e.layer;
+        L.DomEvent.stop(e);
+        console.log("continueBackward");
+        // Consume default behavior
+        e.layer.editor.consume = (e.layer.editor.drawing === L.Editable.FORWARD);
+      }
+      else if (index === e.vertex.getLastIndex()) {
+        e.layer.editor.continueForward();
+        this.feature = e.layer;
+        L.DomEvent.stop(e);
+        console.log("continueForward");
+        // Consume default behavior
+        e.layer.editor.consume = (e.layer.editor.drawing === L.Editable.BACKWARD);
+      }
+    }
+  }
+});
+
+/* Polyline Editor */
+LeafletIonic.Editable.Polyline.Editor = L.Editable.PolylineEditor.extend({
+  consume: false,
+  commitDrawing: function() {
+    if(this.consume) {
+      this.consume = false;
+    } else {
+      L.Editable.PolylineEditor.prototype.commitDrawing.call(this);
+    }
+  },
+  vertexCanBeDeleted: function () {
+      return false;
   }
 });
 
@@ -333,8 +373,15 @@ LeafletIonic.Editable.Polygon = LeafletIonic.Editable.Feature.extend({
     LeafletIonic.Editable.Feature.prototype.initialize.call(this, L.Polygon, 'Add a new line','map-icon-polygon');
   },
   onStart: function(latlng) {
-    console.log(latlng);
+    //console.log(latlng);
     return this.map.editTools.startPolygon();
+  }
+});
+
+/* Polygon Editor */
+LeafletIonic.Editable.Polygon.Editor = L.Editable.PolygonEditor.extend({
+  vertexCanBeDeleted: function () {
+      return false;
   }
 });
 
@@ -363,6 +410,13 @@ LeafletIonic.Editable.Delete = LeafletIonic.Editable.Base.extend({
   onCancel: function() {
     this.onFinish();
   }
+
+});
+
+/* Set static properties */
+L.Map.mergeOptions({
+    polylineEditorClass: LeafletIonic.Editable.Polyline.Editor,
+    polygonEditorClass: LeafletIonic.Editable.Polygon.Editor
 
 });
 

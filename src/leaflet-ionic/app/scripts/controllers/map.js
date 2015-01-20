@@ -25,7 +25,12 @@ angular.module('LeafletIonic.controllers')
 
   // Search and center on given location.
   map.search = function(query) {
-    if(query) {
+    var location;
+    query = query.trim();
+    if(location = LeafletIonic.Srs.parse(query)) {
+      map.panTo(location, true);
+    }
+    else if(query) {
       geocode.search(query).then(function(results) {
         scope.search.results = results;
         if(results.length === 1) {
@@ -74,7 +79,59 @@ angular.module('LeafletIonic.controllers')
     });
 
   });
-
-
-
 }]);
+
+/* Define Utility classes
+ *
+ * Converted regex for verifying common coordinate systems from
+ *  - https://gist.github.com/cgudea/7c558138cb48b36e785b
+ * to javascript using https://www.regex101.com/
+ *
+ */
+LeafletIonic.Srs = {
+  Decimal: {
+    REGEX: /^-?(180((\.0{0,})?)|([1]?[0-7]?\d(\.\d{0,})?))$/,
+    is: function(data) {
+      return LeafletIonic.Srs.match(this.REGEX, data, 2, function(matches) {
+        return L.latLng(matches[0][0], matches[1][0]);
+      });
+    }
+  },
+  Utm: {
+    REGEX: /^(\d{1,2})(\/|\:| |)([^aboiyzABOIYZ\d\[-\` -@])(\/|\:| |)(\d{2,})$/,
+    is: function(data) {
+      return LeafletIonic.Srs.match(this.REGEX, data, 1, function(coords) {
+        return coords;
+      });
+    }
+  },
+  Mgrs: {
+    REGEX: /^\d{1,2}[^ABIOYZabioyz][A-Za-z]{2}([0-9][0-9])+$/,
+    is: function(data) {
+      return LeafletIonic.Srs.match(this.REGEX, data);
+    }
+  },
+  parse: function(data) {
+    var location;
+    if(location = this.Decimal.is(data)) {
+      return location;
+    }
+    if(location = this.Utm.is(data)) {
+      return location;
+    }
+    if(location = this.Mgrs.is(data)) {
+      return location;
+    }
+    return false;
+  },
+  match: function(r, data, length, translate) {
+    var matches = [];
+    angular.forEach(data.trim().split(/\s|,/), function(str) {
+      var m;
+      if((m = r.exec(str)) != null) {
+        matches.push(m);
+      }
+    });
+    return (matches.length === length ? translate(matches) : false);
+  }
+};

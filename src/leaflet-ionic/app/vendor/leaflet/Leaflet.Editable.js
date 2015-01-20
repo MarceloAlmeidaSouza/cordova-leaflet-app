@@ -933,7 +933,9 @@ L.Polyline.include({
 
     _containsPoint: function (p, closed) {  // Copy-pasted from Leaflet
         var i, j, k, len, len2, dist, part,
-            w = this.options.weight / 2;
+            // Removed for improved click accuracy
+            // w = this.options.weight / 2;
+            w = this.options.weight;
 
         if (L.Browser.touch) {
             w += 10; // polyline click tolerance on touch devices
